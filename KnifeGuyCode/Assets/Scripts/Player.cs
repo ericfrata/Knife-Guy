@@ -1,14 +1,23 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour 
 {
+    //floats
     public float maxSpeed = 3;
     public float speed = 50f;
     public float jumpPower = 150f;
 
+    // Booleans
     public bool grounded;
+    public bool canDoubleJump;
 
+    //Status
+    public int curHealth;
+    public int maxHealth = 100;
+
+    //References
     private Rigidbody2D rb2d;
     private Animator anim; 
 
@@ -17,6 +26,8 @@ public class Player : MonoBehaviour
     {
         rb2d = gameObject.GetComponent<Rigidbody2D>();
         anim = gameObject.GetComponent<Animator>();
+
+        curHealth = maxHealth;
     }
 
     void Update()
@@ -32,9 +43,32 @@ public class Player : MonoBehaviour
         {
             transform.localScale = new Vector3(1, 1, 1);
         }
-        if(Input.GetButtonDown("Jump") && grounded)
+        if(Input.GetButtonDown("Jump"))
         {
-            rb2d.AddForce(Vector2.up * jumpPower);
+            if (grounded)
+            {
+                rb2d.AddForce(Vector2.up * jumpPower);
+                canDoubleJump = true;
+
+            }
+            else if (canDoubleJump)
+            {
+                canDoubleJump = false;
+                rb2d.velocity = new Vector2(rb2d.velocity.x, 0);
+                rb2d.AddForce(Vector2.up * jumpPower / 1.75f);
+            }
+            
+        }
+
+        if (curHealth > maxHealth)
+        {
+            curHealth = maxHealth;
+        }
+
+        if (curHealth <= 0)
+        {
+            Die();
+
         }
 
     }
@@ -69,6 +103,12 @@ public class Player : MonoBehaviour
         }
 
 
+    }
+
+    void Die()
+    {
+        //Restart
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
 }
